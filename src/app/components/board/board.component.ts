@@ -1,11 +1,12 @@
 import { Component, OnInit, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SquareComponent } from '../square/square.component';
+import { NomeParticipantesComponent } from '../nome-participantes/nome-participantes.component';
 
 @Component({
   selector: 'app-board',
   standalone: true,
-  imports: [CommonModule, SquareComponent],
+  imports: [CommonModule, SquareComponent, NomeParticipantesComponent],
   templateUrl: './board.component.html',
   styleUrls: ['./board.component.scss'],
 })
@@ -15,9 +16,20 @@ export class BoardComponent implements OnInit {
   winner!: string;
   winningSquares: number[] = [];
   recognition: any;
-
+  player1: string = '';
+  player2: string = '';
   constructor(private ngZone: NgZone) {
     this.newGame();
+  }
+
+
+
+  startGame(event: { player1: string, player2: string }) {
+    this.player1 = event.player1;
+    this.player2 = event.player2;
+    console.log( this.player1,  this.player2);
+
+    // Iniciar o jogo com os nomes dos participantes
   }
 
   ngOnInit() {
@@ -89,7 +101,8 @@ export class BoardComponent implements OnInit {
     if (SpeechRecognition) {
       this.recognition = new SpeechRecognition();
       this.recognition.continuous = true;
-      this.recognition.lang = 'en-US';
+      //this.recognition.lang = 'en-US';
+      this.recognition.lang = 'pt-BR'; //pt-BR
 
       this.recognition.onresult = (event: any) => {
         this.ngZone.run(() => {
@@ -107,21 +120,21 @@ export class BoardComponent implements OnInit {
 
   handleVoiceCommand(command: string) {
     const moveCommands = [
-      'top left',
-      'top middle',
-      'top right',
-      'middle left',
-      'center',
-      'middle right',
-      'bottom left',
-      'bottom middle',
-      'bottom right',
+      'superior esquerdo',
+      'superior meio',
+      'superior direito',
+      'meio esquerdo',
+      'centro',
+      'meio direito',
+      'inferior esquerdo',
+      'inferior meio',
+      'inferior direito',
     ];
     const moveIndex = moveCommands.indexOf(command.toLowerCase());
 
     if (moveIndex > -1) {
       this.makeMove(moveIndex);
-    } else if (['new game', 'restart', 'play again'].includes(command.toLowerCase())) {
+    } else if (['novo jogo', 'recomeçar', 'jogar novamente'].includes(command.toLowerCase())) {
       this.newGame();
     } else {
       console.log('Command not recognized:', command);
