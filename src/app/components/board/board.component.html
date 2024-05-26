@@ -1,0 +1,28 @@
+<main class="screen">
+  <h1 class="game-title">JOGO DA VELHA (#) - EINK3.1</h1>
+
+  <ng-container *ngIf="winner">
+    <h2 class="winner-player-title">O jogador {{winner}} ganhou o jogo!</h2>
+  </ng-container>
+
+  <ng-container *ngIf="!winner && noOneWonTheGame()">
+    <h2 class="winner-player-title">O jogo saiu empatado ...</h2>
+  </ng-container>
+
+  <ng-container *ngIf="!winner && !noOneWonTheGame()">
+    <h3 class="current-player-title">Jogador Actual: {{ player }}</h3>
+  </ng-container>
+
+  <section class="boargame">
+    <app-square
+      *ngFor="let square of squares; let i = index"
+      [value]="square"
+      (click)="makeMove(i)"
+    >
+    </app-square>
+  </section>
+
+  <button class="new-game-button" *ngIf="winner || noOneWonTheGame()" (click)="newGame()" style="cursor: pointer;">
+    Começar Um Novo Jogo
+  </button>
+</main>
