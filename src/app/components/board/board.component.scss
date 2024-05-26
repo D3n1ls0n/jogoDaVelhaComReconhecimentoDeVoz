@@ -20,3 +20,25 @@ section {
     font-weight: 600;
     border: 0;
 }
+
+.legend {
+  display: flex;
+  flex-direction: column;
+  margin-top: -30%;
+  margin-left: 76%;
+  text-align: justify;
+}
+
+.legend ol {
+  list-style: none;
+  padding: 0;
+}
+
+.legend li {
+  margin-bottom: 5px;
+}
+
+.legend p {
+  margin-top: 20px;
+  font-size: 12px;
+}
