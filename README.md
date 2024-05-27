@@ -45,7 +45,7 @@ Here you list all prerequisites necessary for running your project. For example:
 How to clone your project
 
 ```bash
-git clone github.com/gustavoestevesr/tic-tac-toe-pwa-angular
+git clone https://github.com/D3n1ls0n/jogoDaVelhaComReconhecimentoDeVoz.git
 ```
 
 <h3>Starting</h3>
