@@ -36,7 +36,7 @@ Here you describe how to run your project locally
 
 Here you list all prerequisites necessary for running your project. For example:
 
-- [NodeJS](https://github.com/)
+- [NodeJS](https://nodejs.org/en/download/package-manager/current)
 - [Git 2](https://github.com)
 - [Angular](https://angular.io/)
 
