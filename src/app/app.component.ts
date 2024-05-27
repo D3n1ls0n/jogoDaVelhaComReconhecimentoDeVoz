@@ -12,4 +12,7 @@ import { FormsModule } from '@angular/forms';
 })
 export class AppComponent {
   title = 'tic-tac-toe-pwa-angular';
+  onStartGame(event: { player1: string, player2: string }) {
+    console.log('Jogo iniciado com:', event);
+  }
 }

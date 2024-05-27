@@ -1,15 +1,14 @@
 import { Component, OnInit, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SquareComponent } from '../square/square.component';
-import { NomeParticipantesComponent } from '../nome-participantes/nome-participantes.component';
-
 @Component({
   selector: 'app-board',
   standalone: true,
-  imports: [CommonModule, SquareComponent, NomeParticipantesComponent],
+  imports: [CommonModule, SquareComponent],
   templateUrl: './board.component.html',
   styleUrls: ['./board.component.scss'],
 })
+
 export class BoardComponent implements OnInit {
   squares!: any[];
   xIsNext!: boolean;

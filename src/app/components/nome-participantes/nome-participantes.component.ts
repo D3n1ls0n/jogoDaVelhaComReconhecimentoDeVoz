@@ -1,8 +1,10 @@
 import { Component, EventEmitter, Output } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-nome-participantes',
   standalone: true,
+  imports: [CommonModule],
   templateUrl: './nome-participantes.component.html',
   styleUrls: ['./nome-participantes.component.scss'],
 })
@@ -17,6 +19,8 @@ export class NomeParticipantesComponent {
   player2Name: string = '';
   player1Piece: string = '';
   player2Piece: string = '';
+  currentStep: number = 0; // Track the current step in the voice recognition process
+  isRecognitionActive: boolean = false;
 
   constructor() {}
 

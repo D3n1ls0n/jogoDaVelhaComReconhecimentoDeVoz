@@ -1,0 +1,36 @@
+.container {
+  text-align: center;
+  padding: 20px;
+}
+
+.start-btn {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+  margin: 10px 0;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  border-radius: 5px;
+}
+
+.start-btn:disabled {
+  background-color: #9E9E9E;
+  cursor: not-allowed;
+}
+
+.instruction {
+  margin-top: 20px;
+  font-size: 18px;
+  color: #333;
+}
+
+.feedback {
+  margin-top: 10px;
+  font-size: 16px;
+  color: #666;
+}
+
+.feedback strong {
+  color: #000;
+}
