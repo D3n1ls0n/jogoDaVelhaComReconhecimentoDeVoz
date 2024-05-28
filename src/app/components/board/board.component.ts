@@ -1,14 +1,16 @@
 import { Component, OnInit, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SquareComponent } from '../square/square.component';
+import { NomeParticipantesComponent } from '../nome-participantes/nome-participantes.component';
+import { ActivatedRoute } from '@angular/router';
+
 @Component({
   selector: 'app-board',
   standalone: true,
-  imports: [CommonModule, SquareComponent],
+  imports: [CommonModule, SquareComponent, NomeParticipantesComponent],
   templateUrl: './board.component.html',
   styleUrls: ['./board.component.scss'],
 })
-
 export class BoardComponent implements OnInit {
   squares!: any[];
   xIsNext!: boolean;
@@ -17,21 +19,29 @@ export class BoardComponent implements OnInit {
   recognition: any;
   player1: string = '';
   player2: string = '';
-  constructor(private ngZone: NgZone) {
+  player1Name: string | null = null;
+  player1Piece: string | null = null;
+  player2Name: string | null = null;
+  player2Piece: string | null = null;
+  constructor(private ngZone: NgZone, private route: ActivatedRoute) {
     this.newGame();
   }
 
-
-
-  startGame(event: { player1: string, player2: string }) {
+  startGame(event: { player1: string; player2: string }) {
     this.player1 = event.player1;
     this.player2 = event.player2;
-    console.log( this.player1,  this.player2);
+    console.log(this.player1, this.player2);
 
     // Iniciar o jogo com os nomes dos participantes
   }
 
   ngOnInit() {
+    this.route.queryParams.subscribe((params) => {
+      this.player1Name = params['player1'];
+      this.player1Piece = params['player1Piece'];
+      this.player2Name = params['player2'];
+      this.player2Piece = params['player2Piece'];
+    });
     this.setupVoiceRecognition();
   }
 
@@ -97,6 +107,7 @@ export class BoardComponent implements OnInit {
     const SpeechRecognition =
       (window as any).SpeechRecognition ||
       (window as any).webkitSpeechRecognition;
+
     if (SpeechRecognition) {
       this.recognition = new SpeechRecognition();
       this.recognition.continuous = true;
@@ -110,7 +121,7 @@ export class BoardComponent implements OnInit {
           this.handleVoiceCommand(transcript);
         });
       };
-
+      this.recognition.stop();
       this.recognition.start();
     } else {
       alert('Seu navegador não suporta reconhecimento de fala.');
@@ -133,7 +144,11 @@ export class BoardComponent implements OnInit {
 
     if (moveIndex > -1) {
       this.makeMove(moveIndex);
-    } else if (['novo jogo', 'recomeçar', 'jogar novamente'].includes(command.toLowerCase())) {
+    } else if (
+      ['novo jogo', 'recomeçar', 'jogar novamente'].includes(
+        command.toLowerCase()
+      )
+    ) {
       this.newGame();
     } else {
       console.log('Command not recognized:', command);

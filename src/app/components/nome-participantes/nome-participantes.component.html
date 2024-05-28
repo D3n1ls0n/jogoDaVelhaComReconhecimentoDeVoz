@@ -4,13 +4,13 @@
     Iniciar Reconhecimento de Voz
   </button>
 
-  <div *ngIf="currentStep === 0" class="instruction">
+  <div *ngIf="currentStep == 0" class="instruction">
     <p>Por favor, diga o nome do Jogador 1.</p>
   </div>
-  <div *ngIf="currentStep === 1" class="instruction">
+  <div *ngIf="currentStep == 1" class="instruction">
     <p>Por favor, escolha sua peça, Jogador 1 (UM ou DOIS).</p>
   </div>
-  <div *ngIf="currentStep === 2" class="instruction">
+  <div *ngIf="currentStep == 2" class="instruction">
     <p>Por favor, diga o nome do Jogador 2.</p>
   </div>
   <div *ngIf="player1Name" class="feedback">

@@ -1,4 +1,10 @@
 <main class="screen game-container">
+  <div class="board">
+    <h2>T A B U L E I R O</h2>
+    <p>Jogador 1: {{ player1Name }} ({{ player1Piece }})</p>
+    <p>Jogador 2: {{ player2Name }} ({{ player2Piece }})</p>
+  </div>
+
   <h1 class="game-title">JOGO DA VELHA (#) - EINK3.1</h1>
 
   <ng-container *ngIf="winner">
