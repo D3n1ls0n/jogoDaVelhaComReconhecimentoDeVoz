@@ -80,7 +80,7 @@ export class NomeParticipantesComponent {
           this.recognition.stop();
           setTimeout(() => {
             this.recognition.start();
-          }, 100);
+          }, 1000);
         } else if (step === 1) {
           console.log('step 1');
           console.log(transcript);
@@ -94,7 +94,7 @@ export class NomeParticipantesComponent {
             this.player1Piece = transcript.toLowerCase() === 'peça 1' ? 'X' : 'O';
             console.log(
               `Jogador 1 escolheu ${
-                this.player1Piece === 'peça 1' ? 'UM (X)' : 'DOIS (O)'
+                transcript
               }.`
             );
             this.player2Piece = this.player1Piece === 'X' ? 'O' : 'X'; // Peça restante para o jogador 2
@@ -121,7 +121,7 @@ export class NomeParticipantesComponent {
             }.`
           );
           this.recognition.stop();
-          this.submitNames(); // Certifique-se de que a função submitNames é chamada aqui
+         this.submitNames(); // Certifique-se de que a função submitNames é chamada aqui
         }
       };
 

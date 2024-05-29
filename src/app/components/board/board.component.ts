@@ -23,6 +23,9 @@ export class BoardComponent implements OnInit {
   player1Piece: string | null = null;
   player2Name: string | null = null;
   player2Piece: string | null = null;
+  countdown: number = 0;
+  showCountdown = true;
+  showStartMessage = false;
   constructor(private ngZone: NgZone, private route: ActivatedRoute) {
     this.newGame();
   }
@@ -42,13 +45,39 @@ export class BoardComponent implements OnInit {
       this.player2Name = params['player2'];
       this.player2Piece = params['player2Piece'];
     });
+    this.startCountdown();
+    this.newGame()
     this.setupVoiceRecognition();
+  }
+
+
+
+  startCountdown() {
+    this.countdown = 3; // Iniciar contagem regressiva a partir de 3
+    const interval = setInterval(() => {
+      if (this.countdown > 1) {
+        this.countdown--;
+      } else {
+        clearInterval(interval);
+        this.showCountdown = false;
+        this.showStartMessage = true;
+        setTimeout(() => {
+          this.showStartMessage = false;
+        }, 2000); // Mostrar a mensagem "Começar o Jogo" por 2 segundos
+      }
+    }, 1000);
   }
 
   newGame() {
     this.squares = Array(9).fill(null);
     this.winner = '';
-    this.xIsNext = true;
+    console.log(this.player1Piece);
+
+    if (this.player1Piece === 'X') {
+      this.xIsNext = true;
+    }else {
+      this.xIsNext = false;
+    }
     this.winningSquares = [];
   }
 
@@ -121,7 +150,6 @@ export class BoardComponent implements OnInit {
           this.handleVoiceCommand(transcript);
         });
       };
-      this.recognition.stop();
       this.recognition.start();
     } else {
       alert('Seu navegador não suporta reconhecimento de fala.');

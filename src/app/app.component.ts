@@ -18,7 +18,7 @@ import { Router, NavigationEnd } from '@angular/router';
   styleUrl: './app.component.scss',
 })
 export class AppComponent {
-  title = 'tic-tac-toe-pwa-angular';
+  title = 'Jogo Da Velha EINK 3.1';
 
   constructor(private router: Router) {}
   onStartGame(event: { player1: string; player2: string }) {

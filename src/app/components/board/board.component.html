@@ -1,51 +1,64 @@
 <main class="screen game-container">
-  <div class="board">
-    <h2>T A B U L E I R O</h2>
-    <p>Jogador 1: {{ player1Name }} ({{ player1Piece }})</p>
-    <p>Jogador 2: {{ player2Name }} ({{ player2Piece }})</p>
+  <!-- Contagem regressiva -->
+  <div *ngIf="showCountdown" class="countdown">
+    <h1>{{ countdown }}</h1>
   </div>
 
-  <h1 class="game-title">JOGO DA VELHA (#) - EINK3.1</h1>
+  <!-- Mensagem de início do jogo -->
+  <div *ngIf="showStartMessage" class="start-message">
+    <h1>Começar o Jogo</h1>
+  </div>
 
-  <ng-container *ngIf="winner">
-    <h2 class="winner-player-title">O jogador {{winner}} ganhou o jogo!</h2>
-  </ng-container>
+  <!-- Tabuleiro do jogo, ocultar enquanto a contagem regressiva estiver ativa -->
+  <div *ngIf="!showCountdown && !showStartMessage">
+    <div class="board">
+      <h2>T A B U L E I R O</h2>
+      <p>Jogador 1: {{ player1Name }} ({{ player1Piece }})</p>
+      <p>Jogador 2: {{ player2Name }} ({{ player2Piece }})</p>
+    </div>
 
-  <ng-container *ngIf="!winner && noOneWonTheGame()">
-    <h2 class="winner-player-title">O jogo saiu empatado ...</h2>
-  </ng-container>
+    <h1 class="game-title">JOGO DA VELHA (#) - EINK3.1</h1>
 
-  <ng-container *ngIf="!winner && !noOneWonTheGame()">
-    <h3 class="current-player-title">Jogador Atual: {{ player }}</h3>
-  </ng-container>
+    <ng-container *ngIf="winner">
+      <h2 class="winner-player-title">O jogador {{winner}} ganhou o jogo!</h2>
+    </ng-container>
 
-  <section class="board-game">
-    <app-square
-      *ngFor="let square of squares; let i = index"
-      [value]="square"
-      (click)="makeMove(i)"
-    >
-    </app-square>
-  </section>
+    <ng-container *ngIf="!winner && noOneWonTheGame()">
+      <h2 class="winner-player-title">O jogo saiu empatado ...</h2>
+    </ng-container>
 
-  <button class="new-game-button" *ngIf="winner || noOneWonTheGame()" (click)="newGame()" style="cursor: pointer;">
-    Começar Um Novo Jogo
-  </button>
+    <ng-container *ngIf="!winner && !noOneWonTheGame()">
+      <h3 class="current-player-title">Jogador Atual: {{ player }}</h3>
+    </ng-container>
 
-  <!-- Legenda do tabuleiro -->
-  <div class="legend">
-    <h6>Legenda do jogo</h6>
-    <ol>
-      <li>1 - Superior Esquerdo</li>
-      <li>2 - Superior Meio</li>
-      <li>3 - Superior Direito</li>
-      <li>4 - Meio Esquerdo</li>
-      <li>5 - Centro</li>
-      <li>6 - Meio Direito</li>
-      <li>7 - Inferior Esquerdo</li>
-      <li>8 - Inferior Meio</li>
-      <li>9 - Inferior Direito</li>
-    </ol>
-    <p>Novo Jogo, Recomeçar, Jogar Novamente</p>
+    <section class="board-game">
+      <app-square
+        *ngFor="let square of squares; let i = index"
+        [value]="square"
+        (click)="makeMove(i)"
+      >
+      </app-square>
+    </section>
+
+    <button class="new-game-button" *ngIf="winner || noOneWonTheGame()" (click)="newGame()" style="cursor: pointer;">
+      Começar Um Novo Jogo
+    </button>
+
+    <!-- Legenda do tabuleiro -->
+    <div class="legend">
+      <h6>Legenda do jogo</h6>
+      <ol>
+        <li>1 - Superior Esquerdo</li>
+        <li>2 - Superior Meio</li>
+        <li>3 - Superior Direito</li>
+        <li>4 - Meio Esquerdo</li>
+        <li>5 - Centro</li>
+        <li>6 - Meio Direito</li>
+        <li>7 - Inferior Esquerdo</li>
+        <li>8 - Inferior Meio</li>
+        <li>9 - Inferior Direito</li>
+      </ol>
+      <p>Novo Jogo, Recomeçar, Jogar Novamente</p>
+    </div>
   </div>
 </main>
