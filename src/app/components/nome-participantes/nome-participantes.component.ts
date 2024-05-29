@@ -20,6 +20,7 @@ export class NomeParticipantesComponent {
   player2Name: string = '';
   player1Piece: string = '';
   player2Piece: string = '';
+  decision: string = '';
   public currentStep: number = 0; // Track the current step in the voice recognition process
   isRecognitionActive: boolean = false;
 
@@ -113,6 +114,8 @@ export class NomeParticipantesComponent {
             console.log('Escolha inválida. Por favor, escolha UM ou DOIS.');
           }
         } else if (step === 2) {
+          step++;
+          this.currentStep = step;
           console.log('step 2');
 
           this.player2Name = transcript;
@@ -122,15 +125,25 @@ export class NomeParticipantesComponent {
               this.player2Piece === 'X' ? 'UM (X)' : 'DOIS (O)'
             }.`
           );
+          console.log('Gostaria de iniciar o jogo? Diga SIM para começar.');
           this.recognition.stop();
           setTimeout(() => {
             this.recognition.start();
           }, 1000);
-          if (transcript.toLowerCase() === 'sim') {
+        } else if (step === 3) {
+          console.log('step 3');
+          this.decision = transcript.toLowerCase();
+console.log(this.decision);
+
+          if (this.decision === 'sim') {
             this.recognition.stop();
             this.submitNames(); // Certifique-se de que a função submitNames é chamada aqui
           } else {
+            console.log('Jogo não iniciado. Por favor, diga SIM para começar.');
             this.recognition.stop();
+            setTimeout(() => {
+              this.recognition.start();
+            }, 1000);
           }
         }
       };

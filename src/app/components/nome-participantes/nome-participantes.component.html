@@ -22,7 +22,9 @@
   <div *ngIf="player2Name" class="feedback">
     <p>Nome do Jogador 2: <strong>{{ player2Name }}</strong></p>
     <p>Jogador 2 ficará com a peça: <strong>{{ player2Piece === 'X' ? 'PEÇA 1 (X)' : 'PEÇA 2 (O)' }}</strong></p>
-    <p><strong>Deseja continuar?</strong></p>
-
+    <p><strong>Gostaria de iniciar o jogo? Diga SIM para começar.</strong></p>
+  </div>
+  <div *ngIf="decision == 'não'" class="feedback">
+    <p><strong>Jogo não iniciado. Por favor, diga SIM para começar.</strong></p>
   </div>
 </div>
