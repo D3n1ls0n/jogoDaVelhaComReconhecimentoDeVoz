@@ -60,6 +60,12 @@ export class NomeParticipantesComponent {
       this.recognition.continuous = false;
       this.recognition.lang = 'pt-BR';
 
+      this.recognition.onstart = () => {
+        this.ngZone.run(() => {
+          this.isRecognitionActive = true; // Para controlar o front
+        });
+      };
+
       let step = 0; // Step counter to track the stage of input (0: player 1 name, 1: player 1 piece, 2: player 2 name)
       this.currentStep = step;
       console.log('this.currentStep', this.currentStep);
