@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, NgZone  } from '@angular/core';
+import { Component, EventEmitter, Output, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
@@ -38,15 +38,14 @@ export class NomeParticipantesComponent {
           player1: this.player1Name,
           player1Piece: this.player1Piece,
           player2: this.player2Name,
-          player2Piece: this.player2Piece
-        }
+          player2Piece: this.player2Piece,
+        },
       });
     });
   }
 
-  testRout(){
-    this.router.navigate(['/board'])
-
+  testRout() {
+    this.router.navigate(['/board']);
   }
 
   // DEVE SER ALTERADO AQUI ..................................................................................................
@@ -97,12 +96,9 @@ export class NomeParticipantesComponent {
             transcript.toLowerCase() === 'peça 2' ||
             transcript.toLowerCase() === '2'
           ) {
-            this.player1Piece = transcript.toLowerCase() === 'peça 1' ? 'X' : 'O';
-            console.log(
-              `Jogador 1 escolheu ${
-                transcript
-              }.`
-            );
+            this.player1Piece =
+              transcript.toLowerCase() === 'peça 1' ? 'X' : 'O';
+            console.log(`Jogador 1 escolheu ${transcript}.`);
             this.player2Piece = this.player1Piece === 'X' ? 'O' : 'X'; // Peça restante para o jogador 2
             step++;
             this.currentStep = step;
@@ -127,7 +123,15 @@ export class NomeParticipantesComponent {
             }.`
           );
           this.recognition.stop();
-         this.submitNames(); // Certifique-se de que a função submitNames é chamada aqui
+          setTimeout(() => {
+            this.recognition.start();
+          }, 1000);
+          if (transcript.toLowerCase() === 'sim') {
+            this.recognition.stop();
+            this.submitNames(); // Certifique-se de que a função submitNames é chamada aqui
+          } else {
+            this.recognition.stop();
+          }
         }
       };
 
