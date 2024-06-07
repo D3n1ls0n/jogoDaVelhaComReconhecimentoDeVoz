@@ -26,6 +26,8 @@ export class BoardComponent implements OnInit {
   countdown: number = 0;
   showCountdown = true;
   showStartMessage = false;
+  isMachinePlaying = false; // Adicionar variável para verificar se o jogador 2 é a máquina
+
   constructor(private ngZone: NgZone, private route: ActivatedRoute) {
     this.newGame();
   }
@@ -34,7 +36,6 @@ export class BoardComponent implements OnInit {
     this.player1 = event.player1;
     this.player2 = event.player2;
     console.log(this.player1, this.player2);
-
     // Iniciar o jogo com os nomes dos participantes
   }
 
@@ -44,13 +45,16 @@ export class BoardComponent implements OnInit {
       this.player1Piece = params['player1Piece'];
       this.player2Name = params['player2'];
       this.player2Piece = params['player2Piece'];
+
+      // Verificar se o jogador 2 é a máquina
+      if (this.player2Name === 'Máquina') {
+        this.isMachinePlaying = true;
+      }
     });
     this.startCountdown();
-    this.newGame()
+    this.newGame();
     this.setupVoiceRecognition();
   }
-
-
 
   startCountdown() {
     this.countdown = 3; // Iniciar contagem regressiva a partir de 3
@@ -75,7 +79,7 @@ export class BoardComponent implements OnInit {
 
     if (this.player1Piece === 'X') {
       this.xIsNext = true;
-    }else {
+    } else {
       this.xIsNext = false;
     }
     this.winningSquares = [];
@@ -101,6 +105,27 @@ export class BoardComponent implements OnInit {
     if (winnerData) {
       this.winner = winnerData.winner;
       this.winningSquares = winnerData.line;
+    } else if (this.noOneWonTheGame()) {
+      this.winner = 'Empate';
+    }
+
+    // Se for a vez da máquina jogar, fazer o movimento
+    if (!this.xIsNext && this.isMachinePlaying && !this.winner) {
+      setTimeout(() => {
+        this.makeMachineMove();
+      }, 1000); // Adiciona um pequeno atraso antes do movimento da máquina
+    }
+  }
+
+  makeMachineMove() {
+    // Implementar a lógica do movimento da máquina
+    const emptySquares = this.squares
+      .map((square, index) => (square === null ? index : null))
+      .filter((index) => index !== null);
+
+    const randomIndex = emptySquares[Math.floor(Math.random() * emptySquares.length)];
+    if (randomIndex !== null && randomIndex !== undefined) {
+      this.makeMove(randomIndex);
     }
   }
 
@@ -121,11 +146,7 @@ export class BoardComponent implements OnInit {
     ];
     for (let i = 0; i < lines.length; i++) {
       const [a, b, c] = lines[i];
-      if (
-        this.squares[a] &&
-        this.squares[a] === this.squares[b] &&
-        this.squares[a] === this.squares[c]
-      ) {
+      if (this.squares[a] && this.squares[a] === this.squares[b] && this.squares[a] === this.squares[c]) {
         return { winner: this.squares[a], line: lines[i] };
       }
     }
@@ -140,8 +161,8 @@ export class BoardComponent implements OnInit {
     if (SpeechRecognition) {
       this.recognition = new SpeechRecognition();
       this.recognition.continuous = true;
-      //this.recognition.lang = 'en-US';
-      this.recognition.lang = 'pt-BR'; //pt-BR
+      // this.recognition.lang = 'en-US';
+      this.recognition.lang = 'pt-BR'; // pt-BR
 
       this.recognition.onresult = (event: any) => {
         this.ngZone.run(() => {
@@ -173,9 +194,7 @@ export class BoardComponent implements OnInit {
     if (moveIndex > -1) {
       this.makeMove(moveIndex);
     } else if (
-      ['novo jogo', 'recomeçar', 'jogar novamente'].includes(
-        command.toLowerCase()
-      )
+      ['novo jogo', 'recomeçar', 'jogar novamente'].includes(command.toLowerCase())
     ) {
       this.newGame();
     } else {
