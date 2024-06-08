@@ -12,84 +12,87 @@ import { ActivatedRoute } from '@angular/router';
   styleUrls: ['./board.component.scss'],
 })
 export class BoardComponent implements OnInit {
-  squares!: any[];
-  xIsNext!: boolean;
-  winner!: string;
-  winningSquares: number[] = [];
-  recognition: any;
-  player1: string = '';
-  player2: string = '';
-  player1Name: string | null = null;
-  player1Piece: string | null = null;
-  player2Name: string | null = null;
-  player2Piece: string | null = null;
-  countdown: number = 0;
-  showCountdown = true;
-  showStartMessage = false;
-  isMachinePlaying = false; // Adicionar variável para verificar se o jogador 2 é a máquina
+  squares!: any[]; // Array representing the game board
+  xIsNext!: boolean; // Boolean to track which player goes next
+  winner!: string; // String to hold the winner's symbol
+  winningSquares: number[] = []; // Array to store winning combination squares
+  recognition: any; // Variable for speech recognition instance
+  player1: string = ''; // Name of player 1
+  player2: string = ''; // Name of player 2
+  player1Name: string | null = null; // Query parameter for player 1's name
+  player1Piece: string | null = null; // Query parameter for player 1's piece
+  player2Name: string | null = null; // Query parameter for player 2's name
+  player2Piece: string | null = null; // Query parameter for player 2's piece
+  countdown: number = 0; // Countdown timer for game start
+  showCountdown = true; // Boolean to show/hide countdown
+  showStartMessage = false; // Boolean to show/hide start message
+  isMachinePlaying = false; // Indicates if player 2 is a machine
+  records: { name: string, wins: number }[] = []; // List of game records
 
   constructor(private ngZone: NgZone, private route: ActivatedRoute) {
-    this.newGame();
+    this.newGame(); // Initialize a new game on component instantiation
   }
 
   startGame(event: { player1: string; player2: string }) {
-    this.player1 = event.player1;
-    this.player2 = event.player2;
-    console.log(this.player1, this.player2);
-    // Iniciar o jogo com os nomes dos participantes
+    this.player1 = event.player1; // Set player 1's name
+    this.player2 = event.player2; // Set player 2's name
+    console.log(this.player1, this.player2); // Log player names
   }
 
   ngOnInit() {
     this.route.queryParams.subscribe((params) => {
+      // Get player details from query parameters
       this.player1Name = params['player1'];
       this.player1Piece = params['player1Piece'];
       this.player2Name = params['player2'];
       this.player2Piece = params['player2Piece'];
 
-      // Verificar se o jogador 2 é a máquina
+      // Check if player 2 is a machine
       if (this.player2Name === 'Máquina') {
         this.isMachinePlaying = true;
       }
     });
-    this.startCountdown();
-    this.newGame();
-    this.setupVoiceRecognition();
+    this.startCountdown(); // Start the countdown timer
+    this.loadRecords(); // Load game records from localStorage
+    this.newGame(); // Initialize a new game
+    this.setupVoiceRecognition(); // Setup voice recognition for game commands
   }
 
   startCountdown() {
-    this.countdown = 3; // Iniciar contagem regressiva a partir de 3
+    this.countdown = 3; // Start countdown from 3
     const interval = setInterval(() => {
       if (this.countdown > 1) {
-        this.countdown--;
+        this.countdown--; // Decrease countdown
       } else {
-        clearInterval(interval);
-        this.showCountdown = false;
-        this.showStartMessage = true;
+        clearInterval(interval); // Clear interval when countdown ends
+        this.showCountdown = false; // Hide countdown
+        this.showStartMessage = true; // Show start message
         setTimeout(() => {
-          this.showStartMessage = false;
-        }, 2000); // Mostrar a mensagem "Começar o Jogo" por 2 segundos
+          this.showStartMessage = false; // Hide start message after 2 seconds
+        }, 2000);
       }
-    }, 1000);
+    }, 1000); // Interval of 1 second
   }
 
   newGame() {
-    this.squares = Array(9).fill(null);
-    this.winner = '';
-    console.log(this.player1Piece);
+    this.squares = Array(9).fill(null); // Initialize empty board
+    this.winner = ''; // Reset winner
 
+    // Set the next player based on player 1's piece
     if (this.player1Piece === 'X') {
       this.xIsNext = true;
     } else {
       this.xIsNext = false;
     }
-    this.winningSquares = [];
+    this.winningSquares = []; // Reset winning squares
   }
 
   get player() {
-    return this.xIsNext ? 'X' : 'O';
+    return this.xIsNext ? 'X' : 'O'; // Get the current player
   }
 
   canMakeMove(idx: number): boolean {
+    // Check if a move can be made
     const noWinner = !this.winner;
     const squareIsEmpty = !this.squares[idx];
     return noWinner && squareIsEmpty;
@@ -97,28 +100,30 @@ export class BoardComponent implements OnInit {
 
   makeMove(idx: number) {
     if (this.canMakeMove(idx)) {
+      // Make the move if valid
       this.squares.splice(idx, 1, this.player);
-      this.xIsNext = !this.xIsNext;
+      this.xIsNext = !this.xIsNext; // Toggle the next player
     }
 
-    const winnerData = this.calculateWinner();
+    const winnerData = this.calculateWinner(); // Check for a winner
     if (winnerData) {
-      this.winner = winnerData.winner;
-      this.winningSquares = winnerData.line;
+      this.winner = winnerData.winner; // Set the winner
+      this.winningSquares = winnerData.line; // Set the winning squares
+      this.saveWinner(winnerData.winner === 'X' ? this.player1Name : this.player2Name); // Save the winner
     } else if (this.noOneWonTheGame()) {
-      this.winner = 'Empate';
+      this.winner = 'Empate'; // Set draw if no one won
     }
 
-    // Se for a vez da máquina jogar, fazer o movimento
+    // Make a move for the machine if it's the machine's turn
     if (!this.xIsNext && this.isMachinePlaying && !this.winner) {
       setTimeout(() => {
         this.makeMachineMove();
-      }, 1000); // Adiciona um pequeno atraso antes do movimento da máquina
+      }, 1000); // Delay the machine's move
     }
   }
 
   makeMachineMove() {
-    // Implementar a lógica do movimento da máquina
+    // Implement the machine's move logic
     const emptySquares = this.squares
       .map((square, index) => (square === null ? index : null))
       .filter((index) => index !== null);
@@ -130,10 +135,12 @@ export class BoardComponent implements OnInit {
   }
 
   noOneWonTheGame(): boolean {
+    // Check if the game ended in a draw
     return this.squares.every((square) => square !== null);
   }
 
   calculateWinner(): { winner: string; line: number[] } | null {
+    // Determine the winner if there's a winning combination
     const lines = [
       [0, 1, 2],
       [3, 4, 5],
@@ -153,7 +160,36 @@ export class BoardComponent implements OnInit {
     return null;
   }
 
+  saveWinner(winnerName: string | null) {
+    // Save the winner to the records
+    if (!winnerName) return;
+    const record = this.records.find(record => record.name === winnerName);
+    if (record) {
+      record.wins += 1;
+    } else {
+      this.records.push({ name: winnerName, wins: 1 });
+    }
+    this.saveRecords(); // Save records to localStorage
+  }
+
+loadRecords() {
+  // Load records from localStorage
+  const records = localStorage.getItem('tictactoe-records');
+  if (records) {
+    this.records = JSON.parse(records);
+    // Sort records by number of wins in descending order
+    this.records.sort((a, b) => b.wins - a.wins);
+  }
+}
+
+
+  saveRecords() {
+    // Save records to localStorage
+    localStorage.setItem('tictactoe-records', JSON.stringify(this.records));
+  }
+
   setupVoiceRecognition() {
+    // Setup voice recognition for game commands
     const SpeechRecognition =
       (window as any).SpeechRecognition ||
       (window as any).webkitSpeechRecognition;
@@ -161,23 +197,24 @@ export class BoardComponent implements OnInit {
     if (SpeechRecognition) {
       this.recognition = new SpeechRecognition();
       this.recognition.continuous = true;
-      // this.recognition.lang = 'en-US';
-      this.recognition.lang = 'pt-BR'; // pt-BR
+      this.recognition.lang = 'pt-BR'; // Set language to Brazilian Portuguese
 
       this.recognition.onresult = (event: any) => {
+        // Handle voice recognition result
         this.ngZone.run(() => {
           const transcript =
             event.results[event.resultIndex][0].transcript.trim();
-          this.handleVoiceCommand(transcript);
+          this.handleVoiceCommand(transcript); // Process the voice command
         });
       };
-      this.recognition.start();
+      this.recognition.start(); // Start voice recognition
     } else {
-      alert('Seu navegador não suporta reconhecimento de fala.');
+      alert('Seu navegador não suporta reconhecimento de fala.'); // Alert if voice recognition is not supported
     }
   }
 
   handleVoiceCommand(command: string) {
+    // Process the voice command
     const moveCommands = [
       'superior esquerdo',
       'superior meio',
@@ -192,13 +229,13 @@ export class BoardComponent implements OnInit {
     const moveIndex = moveCommands.indexOf(command.toLowerCase());
 
     if (moveIndex > -1) {
-      this.makeMove(moveIndex);
+      this.makeMove(moveIndex); // Make the move based on voice command
     } else if (
       ['novo jogo', 'recomeçar', 'jogar novamente'].includes(command.toLowerCase())
     ) {
-      this.newGame();
+      this.newGame(); // Start a new game based on voice command
     } else {
-      console.log('Command not recognized:', command);
+      console.log('Command not recognized:', command); // Log unrecognized command
     }
   }
 }

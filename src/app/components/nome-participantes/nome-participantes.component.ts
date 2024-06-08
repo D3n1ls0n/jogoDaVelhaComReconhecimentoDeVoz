@@ -10,29 +10,27 @@ import { Router } from '@angular/router';
   styleUrls: ['./nome-participantes.component.scss'],
 })
 export class NomeParticipantesComponent {
-  @Output() startGame = new EventEmitter<{
-    player1: string;
-    player2: string;
-  }>();
+  @Output() startGame = new EventEmitter<{ player1: string; player2: string }>(); // Emite evento para iniciar o jogo
 
-  recognition: any;
-  player1Name: string = '';
-  player2Name: string = '';
-  player1Piece: string = '';
-  player2Piece: string = '';
-  decision: string = '';
-  public currentStep: number = 0; // Track the current step in the voice recognition process
-  isRecognitionActive: boolean = false;
-  playingAgainstMachine: boolean = false;
+  recognition: any; // Instância do reconhecimento de voz
+  player1Name: string = ''; // Nome do jogador 1
+  player2Name: string = ''; // Nome do jogador 2
+  player1Piece: string = ''; // Peça do jogador 1
+  player2Piece: string = ''; // Peça do jogador 2
+  decision: string = ''; // Decisão do jogador
+  public currentStep: number = 0; // Rastreamento da etapa atual no processo de reconhecimento de voz
+  isRecognitionActive: boolean = false; // Indica se o reconhecimento de voz está ativo
+  playingAgainstMachine: boolean = false; // Indica se o jogador está jogando contra a máquina
+
   constructor(private router: Router, private ngZone: NgZone) {}
 
   submitNames() {
+    // Emite os nomes dos jogadores e redireciona para o componente do tabuleiro com parâmetros da URL
     this.startGame.emit({
       player1: this.player1Name,
       player2: this.player2Name,
     });
 
-    // Redirect to the board component with query parameters
     this.ngZone.run(() => {
       this.router.navigate(['/board'], {
         queryParams: {
@@ -46,37 +44,38 @@ export class NomeParticipantesComponent {
   }
 
   testRout() {
-    this.router.navigate(['/board']);
+    this.router.navigate(['/board']); // Redireciona para o componente do tabuleiro (para testes)
   }
 
-  // DEVE SER ALTERADO AQUI ..................................................................................................
-
   speak(message: string) {
+    // Utiliza a síntese de voz para falar uma mensagem
     const speech = new SpeechSynthesisUtterance(message);
     speech.lang = 'pt-BR';
     window.speechSynthesis.speak(speech);
   }
 
   setupVoiceRecognition() {
+    // Configura o reconhecimento de voz
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-
     const synth = window.speechSynthesis;
+
     if (SpeechRecognition && synth) {
       this.recognition = new SpeechRecognition();
       this.recognition.continuous = false;
       this.recognition.lang = 'pt-BR';
 
       this.recognition.onstart = () => {
+        // Indica que o reconhecimento de voz está ativo
         this.ngZone.run(() => {
-          this.isRecognitionActive = true; // Para controlar o front
+          this.isRecognitionActive = true;
         });
       };
 
-      let step = 0; // Step counter to track the stage of input
+      let step = 0; // Contador para rastrear a etapa do processo de entrada de dados
       this.currentStep = step;
-      console.log('this.currentStep', this.currentStep);
 
       const speak = (text: string) => {
+        // Utiliza a síntese de voz para falar uma mensagem e iniciar o reconhecimento de voz após a fala
         const utterThis = new SpeechSynthesisUtterance(text);
         utterThis.lang = 'pt-BR';
         utterThis.onend = () => {
@@ -86,6 +85,7 @@ export class NomeParticipantesComponent {
       };
 
       const promptUser = (text: string) => {
+        // Interrompe o reconhecimento de voz e fala uma mensagem ao usuário
         this.recognition.stop();
         setTimeout(() => {
           speak(text);
@@ -93,98 +93,93 @@ export class NomeParticipantesComponent {
       };
 
       this.recognition.onresult = (event: any) => {
+        // Lida com o resultado do reconhecimento de voz
         const transcript = event.results[event.resultIndex][0].transcript.trim();
 
         if (step === 0) {
+          // Etapa de decidir se o jogo será contra a máquina
           if (transcript.toLowerCase() === 'sim') {
             this.playingAgainstMachine = true;
             step++;
             this.currentStep = step;
-            console.log('this.currentStep', this.currentStep);
-
             promptUser('Por favor, diga o seu nome.');
           } else if (transcript.toLowerCase() === 'não') {
             this.playingAgainstMachine = false;
             step = 2; // Avança para o passo de nome do Jogador 1
             this.currentStep = step;
-            console.log('this.currentStep', this.currentStep);
-
             promptUser('Por favor, diga o nome do Jogador 1.');
           } else {
             promptUser('Escolha inválida. Por favor, diga SIM ou NÃO.');
           }
         } else if (step === 1 && this.playingAgainstMachine) {
+          // Etapa de captura do nome do Jogador 1
           this.player1Name = transcript;
           step++;
           this.currentStep = step;
-          console.log('this.currentStep', this.currentStep);
-
           promptUser('Por favor, escolha sua peça (UM ou DOIS).');
         } else if (step === 2 && this.playingAgainstMachine) {
+          // Etapa de escolha da peça pelo Jogador 1
           if (transcript.toLowerCase() === 'peça 1' || transcript.toLowerCase() === '1' || transcript.toLowerCase() === 'peça 2' || transcript.toLowerCase() === '2') {
             this.player1Piece = transcript.toLowerCase() === 'peça 1' ? 'X' : 'O';
             this.player2Name = 'Máquina';
             this.player2Piece = this.player1Piece === 'X' ? 'O' : 'X';
-
-            console.log(`Você escolheu a peça ${this.player1Piece}.`);
-            console.log('A Máquina ficará com a peça', this.player2Piece);
             step++;
             this.currentStep = step;
-
             promptUser('Gostaria de iniciar o jogo? Diga SIM para começar.');
           } else {
             promptUser('Escolha inválida. Por favor, escolha UM ou DOIS.');
           }
         } else if (step === 3 && this.playingAgainstMachine) {
+          // Etapa de confirmação para iniciar o jogo
           this.decision = transcript.toLowerCase();
           if (this.decision === 'sim') {
             this.recognition.stop();
-            this.submitNames(); // Certifique-se de que a função submitNames é chamada aqui
+            this.submitNames(); // Chama a função submitNames para iniciar o jogo
           } else {
             promptUser('Jogo não iniciado. Por favor, diga SIM para começar.');
           }
         } else if (step === 2 && !this.playingAgainstMachine) {
+          // Etapa de captura do nome do Jogador 1
           this.player1Name = transcript;
           step++;
           this.currentStep = step;
-          console.log('this.currentStep', this.currentStep);
-
           promptUser('Por favor, escolha sua peça, Jogador 1 (UM ou DOIS).');
         } else if (step === 3 && !this.playingAgainstMachine) {
+          // Etapa de escolha da peça pelo Jogador 1
           if (transcript.toLowerCase() === 'peça 1' || transcript.toLowerCase() === '1' || transcript.toLowerCase() === 'peça 2' || transcript.toLowerCase() === '2') {
             this.player1Piece = transcript.toLowerCase() === 'peça 1' ? 'X' : 'O';
             this.player2Piece = this.player1Piece === 'X' ? 'O' : 'X';
             step++;
             this.currentStep = step;
-            console.log('this.currentStep', this.currentStep);
-
             promptUser('Por favor, diga o nome do Jogador 2.');
           } else {
             promptUser('Escolha inválida. Por favor, escolha UM ou DOIS.');
           }
         } else if (step === 4 && !this.playingAgainstMachine) {
+          // Etapa de captura do nome do Jogador 2
           this.player2Name = transcript;
           step++;
           this.currentStep = step;
-          console.log('this.currentStep', this.currentStep);
-
           promptUser(`Jogador 2 ficará com a peça ${this.player2Piece === 'X' ? 'UM (X)' : 'DOIS (O)'}. Gostaria de iniciar o jogo? Diga SIM para começar.`);
         } else if (step === 5 && !this.playingAgainstMachine) {
+          // Etapa de confirmação para iniciar o jogo
           this.decision = transcript.toLowerCase();
           if (this.decision === 'sim') {
             this.recognition.stop();
-            this.submitNames(); // Certifique-se de que a função submitNames é chamada aqui
+            this.submitNames(); // Chama a função submitNames para iniciar o jogo
           } else {
             promptUser('Jogo não iniciado. Por favor, diga SIM para começar.');
           }
         }
       };
 
-      promptUser('Gostaria de jogar contra a máquina? (SIM ou NÃO)');
+      promptUser('Gostaria de jogar contra a máquina? (SIM ou NÃO)'); // Primeira pergunta ao usuário
     } else {
-      alert('Seu navegador não suporta reconhecimento de fala.');
+      alert('Seu navegador não suporta reconhecimento de fala.'); // Alerta se o navegador não suportar reconhecimento de voz
     }
   }
 
-
+  ngOnInit() {
+    // this.setupVoiceRecognition(); // Configura o reconhecimento de voz ao iniciar o componente
+  }
 }

@@ -24,7 +24,7 @@ section {
 .legend {
   display: flex;
   flex-direction: column;
-  margin-top: -30%;
+  margin-top: -42%;
   margin-left: 76%;
   text-align: justify;
 }
@@ -41,4 +41,32 @@ section {
 .legend p {
   margin-top: 20px;
   font-size: 12px;
+}
+
+.screen {
+  position: relative;
+}
+
+.records {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background-color: #f9f9f9;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  width: 350px;
+}
+
+.records h2 {
+  margin-top: 0;
+}
+
+.records ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.records li {
+  padding: 5px 0;
 }

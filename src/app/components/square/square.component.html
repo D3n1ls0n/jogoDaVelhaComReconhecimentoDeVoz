@@ -1,5 +1,6 @@
 <ng-container [ngSwitch]="value">
   <button *ngSwitchCase="null"></button>
+<!-- Cada quadrado que compõe o tabuleiro -->
   <button class="x-square-button" *ngSwitchCase="'X'">{{ value }}</button>
   <button class="o-square-button" *ngSwitchCase="'O'">{{ value }}</button>
 </ng-container>

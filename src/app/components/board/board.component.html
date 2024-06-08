@@ -9,6 +9,14 @@
     <h1>Começar o Jogo</h1>
   </div>
 
+  <!-- Records Section -->
+  <div class="records">
+    <h2>Records</h2>
+    <ul>
+      <li *ngFor="let record of records">{{ record.name }}: {{ record.wins }} vitória(s)</li>
+    </ul>
+  </div>
+
   <!-- Tabuleiro do jogo, ocultar enquanto a contagem regressiva estiver ativa -->
   <div *ngIf="!showCountdown && !showStartMessage">
     <div class="board">
@@ -32,11 +40,7 @@
     </ng-container>
 
     <section class="board-game">
-      <app-square
-        *ngFor="let square of squares; let i = index"
-        [value]="square"
-        (click)="makeMove(i)"
-      >
+      <app-square *ngFor="let square of squares; let i = index" [value]="square" (click)="makeMove(i)">
       </app-square>
     </section>
 
