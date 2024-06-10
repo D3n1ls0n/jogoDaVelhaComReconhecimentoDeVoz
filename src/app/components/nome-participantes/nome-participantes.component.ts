@@ -10,7 +10,10 @@ import { Router } from '@angular/router';
   styleUrls: ['./nome-participantes.component.scss'],
 })
 export class NomeParticipantesComponent {
-  @Output() startGame = new EventEmitter<{ player1: string; player2: string }>(); // Emite evento para iniciar o jogo
+  @Output() startGame = new EventEmitter<{
+    player1: string;
+    player2: string;
+  }>(); // Emite evento para iniciar o jogo
 
   recognition: any; // Instância do reconhecimento de voz
   player1Name: string = ''; // Nome do jogador 1
@@ -55,11 +58,17 @@ export class NomeParticipantesComponent {
   }
 
   setupVoiceRecognition() {
+    console.log('setupVoiceRecognition has been called');
+
     // Configura o reconhecimento de voz
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const SpeechRecognition =
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition;
     const synth = window.speechSynthesis;
 
     if (SpeechRecognition && synth) {
+      console.log(1);
+
       this.recognition = new SpeechRecognition();
       this.recognition.continuous = false;
       this.recognition.lang = 'pt-BR';
@@ -94,7 +103,8 @@ export class NomeParticipantesComponent {
 
       this.recognition.onresult = (event: any) => {
         // Lida com o resultado do reconhecimento de voz
-        const transcript = event.results[event.resultIndex][0].transcript.trim();
+        const transcript =
+          event.results[event.resultIndex][0].transcript.trim();
 
         if (step === 0) {
           // Etapa de decidir se o jogo será contra a máquina
@@ -119,8 +129,14 @@ export class NomeParticipantesComponent {
           promptUser('Por favor, escolha sua peça (UM ou DOIS).');
         } else if (step === 2 && this.playingAgainstMachine) {
           // Etapa de escolha da peça pelo Jogador 1
-          if (transcript.toLowerCase() === 'peça 1' || transcript.toLowerCase() === '1' || transcript.toLowerCase() === 'peça 2' || transcript.toLowerCase() === '2') {
-            this.player1Piece = transcript.toLowerCase() === 'peça 1' ? 'X' : 'O';
+          if (
+            transcript.toLowerCase() === 'peça 1' ||
+            transcript.toLowerCase() === '1' ||
+            transcript.toLowerCase() === 'peça 2' ||
+            transcript.toLowerCase() === '2'
+          ) {
+            this.player1Piece =
+              transcript.toLowerCase() === 'peça 1' ? 'X' : 'O';
             this.player2Name = 'Máquina';
             this.player2Piece = this.player1Piece === 'X' ? 'O' : 'X';
             step++;
@@ -146,8 +162,14 @@ export class NomeParticipantesComponent {
           promptUser('Por favor, escolha sua peça, Jogador 1 (UM ou DOIS).');
         } else if (step === 3 && !this.playingAgainstMachine) {
           // Etapa de escolha da peça pelo Jogador 1
-          if (transcript.toLowerCase() === 'peça 1' || transcript.toLowerCase() === '1' || transcript.toLowerCase() === 'peça 2' || transcript.toLowerCase() === '2') {
-            this.player1Piece = transcript.toLowerCase() === 'peça 1' ? 'X' : 'O';
+          if (
+            transcript.toLowerCase() === 'peça 1' ||
+            transcript.toLowerCase() === '1' ||
+            transcript.toLowerCase() === 'peça 2' ||
+            transcript.toLowerCase() === '2'
+          ) {
+            this.player1Piece =
+              transcript.toLowerCase() === 'peça 1' ? 'X' : 'O';
             this.player2Piece = this.player1Piece === 'X' ? 'O' : 'X';
             step++;
             this.currentStep = step;
@@ -160,7 +182,11 @@ export class NomeParticipantesComponent {
           this.player2Name = transcript;
           step++;
           this.currentStep = step;
-          promptUser(`Jogador 2 ficará com a peça ${this.player2Piece === 'X' ? 'UM (X)' : 'DOIS (O)'}. Gostaria de iniciar o jogo? Diga SIM para começar.`);
+          promptUser(
+            `Jogador 2 ficará com a peça ${
+              this.player2Piece === 'X' ? 'UM (X)' : 'DOIS (O)'
+            }. Gostaria de iniciar o jogo? Diga SIM para começar.`
+          );
         } else if (step === 5 && !this.playingAgainstMachine) {
           // Etapa de confirmação para iniciar o jogo
           this.decision = transcript.toLowerCase();
@@ -180,6 +206,6 @@ export class NomeParticipantesComponent {
   }
 
   ngOnInit() {
-    // this.setupVoiceRecognition(); // Configura o reconhecimento de voz ao iniciar o componente
+    this.setupVoiceRecognition(); // Chama a função setupVoiceRecognition ao iniciar o componente
   }
 }
