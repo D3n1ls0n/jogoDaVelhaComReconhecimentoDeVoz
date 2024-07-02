@@ -4,6 +4,7 @@ import { NomeParticipantesComponent } from './components/nome-participantes/nome
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { Router, NavigationEnd } from '@angular/router';
+import { HttpClientModule } from '@angular/common/http'; // Importação do HttpClientModule
 
 @Component({
   selector: 'app-root',
@@ -13,6 +14,7 @@ import { Router, NavigationEnd } from '@angular/router';
     NomeParticipantesComponent,
     FormsModule,
     RouterModule,
+    HttpClientModule
   ],
   template: '<router-outlet></router-outlet>',
   styleUrl: './app.component.scss',

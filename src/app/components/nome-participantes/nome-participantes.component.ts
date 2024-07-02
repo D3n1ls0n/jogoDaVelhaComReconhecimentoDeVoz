@@ -21,6 +21,8 @@ export class NomeParticipantesComponent {
   player1Piece: string = ''; // Peça do jogador 1
   player2Piece: string = ''; // Peça do jogador 2
   decision: string = ''; // Decisão do jogador
+  player1TicketNumber: string = ''; //Número do BI do jogador 1
+  player2TicketNumber: string = ''; //Número do BI do jogador 2
   public currentStep: number = 0; // Rastreamento da etapa atual no processo de reconhecimento de voz
   isRecognitionActive: boolean = false; // Indica se o reconhecimento de voz está ativo
   playingAgainstMachine: boolean = false; // Indica se o jogador está jogando contra a máquina
@@ -41,6 +43,8 @@ export class NomeParticipantesComponent {
           player1Piece: this.player1Piece,
           player2: this.player2Name,
           player2Piece: this.player2Piece,
+          player1TicketNumber: this.player1TicketNumber,
+          player2TicketNumber: this.player2TicketNumber
         },
       });
     });
@@ -58,8 +62,6 @@ export class NomeParticipantesComponent {
   }
 
   setupVoiceRecognition() {
-    console.log('setupVoiceRecognition has been called');
-
     // Configura o reconhecimento de voz
     const SpeechRecognition =
       (window as any).SpeechRecognition ||
@@ -67,7 +69,7 @@ export class NomeParticipantesComponent {
     const synth = window.speechSynthesis;
 
     if (SpeechRecognition && synth) {
-      console.log(1);
+      console.log('AQUI');
 
       this.recognition = new SpeechRecognition();
       this.recognition.continuous = false;
@@ -94,6 +96,8 @@ export class NomeParticipantesComponent {
       };
 
       const promptUser = (text: string) => {
+        console.log(text);
+
         // Interrompe o reconhecimento de voz e fala uma mensagem ao usuário
         this.recognition.stop();
         setTimeout(() => {
@@ -126,8 +130,14 @@ export class NomeParticipantesComponent {
           this.player1Name = transcript;
           step++;
           this.currentStep = step;
-          promptUser('Por favor, escolha sua peça (UM ou DOIS).');
+          promptUser('Por favor, diga o seu número de bilhete.');
         } else if (step === 2 && this.playingAgainstMachine) {
+          // Etapa de captura do número de bilhete do Jogador 1
+          this.player1TicketNumber = transcript;
+          step++;
+          this.currentStep = step;
+          promptUser('Por favor, escolha sua peça (UM ou DOIS).');
+        } else if (step === 3 && this.playingAgainstMachine) {
           // Etapa de escolha da peça pelo Jogador 1
           if (
             transcript.toLowerCase() === 'peça 1' ||
@@ -145,7 +155,7 @@ export class NomeParticipantesComponent {
           } else {
             promptUser('Escolha inválida. Por favor, escolha UM ou DOIS.');
           }
-        } else if (step === 3 && this.playingAgainstMachine) {
+        } else if (step === 4 && this.playingAgainstMachine) {
           // Etapa de confirmação para iniciar o jogo
           this.decision = transcript.toLowerCase();
           if (this.decision === 'sim') {
@@ -173,13 +183,25 @@ export class NomeParticipantesComponent {
             this.player2Piece = this.player1Piece === 'X' ? 'O' : 'X';
             step++;
             this.currentStep = step;
-            promptUser('Por favor, diga o nome do Jogador 2.');
+            promptUser('Por favor, diga o seu número de bilhete.');
           } else {
             promptUser('Escolha inválida. Por favor, escolha UM ou DOIS.');
           }
         } else if (step === 4 && !this.playingAgainstMachine) {
+          // Etapa de captura do número de bilhete do Jogador 1
+          this.player1TicketNumber = transcript;
+          step++;
+          this.currentStep = step;
+          promptUser('Por favor, diga o nome do Jogador 2.');
+        } else if (step === 5 && !this.playingAgainstMachine) {
           // Etapa de captura do nome do Jogador 2
           this.player2Name = transcript;
+          step++;
+          this.currentStep = step;
+          promptUser('Por favor, diga o número de bilhete do Jogador 2.');
+        } else if (step === 6 && !this.playingAgainstMachine) {
+          // Etapa de captura do número de bilhete do Jogador 2
+          this.player2TicketNumber = transcript;
           step++;
           this.currentStep = step;
           promptUser(
@@ -187,7 +209,7 @@ export class NomeParticipantesComponent {
               this.player2Piece === 'X' ? 'UM (X)' : 'DOIS (O)'
             }. Gostaria de iniciar o jogo? Diga SIM para começar.`
           );
-        } else if (step === 5 && !this.playingAgainstMachine) {
+        } else if (step === 7 && !this.playingAgainstMachine) {
           // Etapa de confirmação para iniciar o jogo
           this.decision = transcript.toLowerCase();
           if (this.decision === 'sim') {
@@ -199,6 +221,7 @@ export class NomeParticipantesComponent {
         }
       };
 
+      console.log(1);
       promptUser('Gostaria de jogar contra a máquina? (SIM ou NÃO)'); // Primeira pergunta ao usuário
     } else {
       alert('Seu navegador não suporta reconhecimento de fala.'); // Alerta se o navegador não suportar reconhecimento de voz
@@ -206,6 +229,6 @@ export class NomeParticipantesComponent {
   }
 
   ngOnInit() {
-    this.setupVoiceRecognition(); // Chama a função setupVoiceRecognition ao iniciar o componente
+    this.setupVoiceRecognition(); // Inicia o reconhecimento de voz quando o componente é carregado
   }
 }

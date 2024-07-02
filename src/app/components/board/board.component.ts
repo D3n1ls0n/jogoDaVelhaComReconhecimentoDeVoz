@@ -2,7 +2,8 @@ import { Component, OnInit, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SquareComponent } from '../square/square.component';
 import { NomeParticipantesComponent } from '../nome-participantes/nome-participantes.component';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-board',
@@ -23,20 +24,110 @@ export class BoardComponent implements OnInit {
   player1Piece: string | null = null;
   player2Name: string | null = null;
   player2Piece: string | null = null;
+  player1TicketNumber: string | null = null;
+  player2TicketNumber: string | null = null;
   countdown: number = 0;
+  public player2Name_: any;
+
   showCountdown = true;
   showStartMessage = false;
   isMachinePlaying = false;
-  records: { name: string, wins: number }[] = [];
+  records: { name: string; wins: number }[] = [];
+  private data: any;
 
-  constructor(private ngZone: NgZone, private route: ActivatedRoute) {
+  constructor(
+    private ngZone: NgZone,
+    private route: ActivatedRoute,
+    private router: Router,
+    private http: HttpClient
+  ) {
     this.newGame();
   }
 
   startGame(event: { player1: string; player2: string }) {
     this.player1 = event.player1;
     this.player2 = event.player2;
-    console.log(this.player1, this.player2);
+  }
+
+  getAllPlayers() {
+    this.http
+      .get('http://localhost:3000/getAllPlayers')
+      .subscribe((response: any) => {
+        // Inicializa arrays para armazenar nomes e bilhetes
+        const nomes: string[] = [];
+        const bilhetes: string[] = [];
+
+        // Itera sobre a resposta e armazena os valores nos arrays
+        response.forEach((element: any) => {
+          nomes.push(element.Nome);
+          bilhetes.push(element.bi);
+        });
+
+        if (this.player2Name_ != 'Máquina') {
+          // Verifica se player1Name e player1TicketNumber não são null
+          const player1Valid =
+            this.player1Name !== null && this.player1TicketNumber !== null;
+          // Verifica se player2Name e player2TicketNumber não são null
+          const player2Valid =
+            this.player2Name !== null && this.player2TicketNumber !== null;
+
+          if (player1Valid && player2Valid) {
+            // Verifica se existe um nome e bi igual ao dos jogadores que vieram pela rota
+            const player1Exists =
+              nomes.includes(this.player1Name as string) &&
+              bilhetes.includes(this.player1TicketNumber as string);
+            const player2Exists =
+              nomes.includes(this.player2Name as string) &&
+              bilhetes.includes(this.player2TicketNumber as string);
+
+            if (player1Exists && player2Exists) {
+              console.log('Já existe esse usuário.');
+            } else {
+              this.registerPlayer(
+                this.player1Name as string,
+                this.player1TicketNumber as string
+              );
+              this.registerPlayer(
+                this.player2Name as string,
+                this.player2TicketNumber as string
+              );
+              return;
+            }
+          } else {
+            console.log('Os nomes e/ou bilhetes dos jogadores são inválidos.');
+          }
+        } else {
+          // Verifica se player1Name e player1TicketNumber não são null
+          const player1Valid =
+            this.player1Name !== null && this.player1TicketNumber !== null;
+          if (player1Valid) {
+            const player1Exists =
+              nomes.includes(this.player1Name as string) &&
+              bilhetes.includes(this.player1TicketNumber as string);
+
+            if (player1Exists) {
+              console.log('Já existe esse usuário.');
+            } else {
+              this.registerPlayer(
+                this.player1Name as string,
+                this.player1TicketNumber as string
+              );
+            }
+            console.log('Enviar apenas o jogador e BI do jogador 1');
+          }
+        }
+      });
+  }
+
+  registerPlayer(player: any, ticket: any) {
+    const playerData = { Nome: player, bi: ticket };
+    console.log(playerData);
+
+    this.http
+      .post('http://localhost:3000/player', playerData)
+      .subscribe((response: any) => {
+        console.log(response);
+      });
   }
 
   ngOnInit() {
@@ -45,6 +136,8 @@ export class BoardComponent implements OnInit {
       this.player1Piece = params['player1Piece'];
       this.player2Name = params['player2'];
       this.player2Piece = params['player2Piece'];
+      this.player1TicketNumber = params['player1TicketNumber'];
+      this.player2TicketNumber = params['player2TicketNumber'];
 
       if (this.player2Name === 'Máquina') {
         this.isMachinePlaying = true;
@@ -54,8 +147,9 @@ export class BoardComponent implements OnInit {
     this.loadRecords();
     this.newGame();
     this.setupVoiceRecognition();
-    console.log(this.xIsNext, this.isMachinePlaying,this.winner);
-
+    console.log(this.xIsNext, this.isMachinePlaying, this.winner);
+    this.player2Name_ = this.player2Name;
+    this.getAllPlayers();
   }
 
   startCountdown() {
@@ -105,21 +199,52 @@ export class BoardComponent implements OnInit {
       if (winnerData) {
         this.winner = winnerData.winner;
         this.winningSquares = winnerData.line;
-        this.saveWinner(winnerData.winner === 'X' ? this.player1Name : this.player2Name);
+        this.saveWinner(
+          winnerData.winner === 'X' ? this.player1Name : this.player2Name
+        );
         return; // Exit if there's a winner
       } else if (this.noOneWonTheGame()) {
         this.winner = 'Empate';
         return; // Exit if there's a draw
       }
-console.log("Valor Real",this.xIsNext);
-console.log("Valor mudado",!this.xIsNext);
 
-      // Check if it's the machine's turn
-      if (!this.xIsNext && this.isMachinePlaying && (!this.winner || this.winner == '')) {
+      // Check if it's the machine's turn right after the human player's move
+      if (this.isMachinePlaying && !this.xIsNext && !this.winner) {
         setTimeout(() => {
-          this.makeMachineMove();
-        }, 1000); // Delay the machine's move
+          this.announceMachineMove();
+        }, 500); // Delay the machine's move
       }
+    } else {
+      this.speak(
+        'Essa posição já está ocupada. Por favor, escolha outra posição.'
+      );
+    }
+  }
+
+  announceMachineMove() {
+    const emptySquares = this.squares
+      .map((square, index) => (square === null ? index : null))
+      .filter((index) => index !== null);
+
+    const randomIndex =
+      emptySquares[Math.floor(Math.random() * emptySquares.length)];
+    if (randomIndex !== null && randomIndex !== undefined) {
+      const moveCommands = [
+        'superior esquerdo',
+        'superior meio',
+        'superior direito',
+        'meio esquerdo',
+        'centro',
+        'meio direito',
+        'inferior esquerdo',
+        'inferior meio',
+        'inferior direito',
+      ];
+      const moveCommand = moveCommands[randomIndex];
+      this.speak(`A máquina irá jogar na posição ${moveCommand}.`);
+      setTimeout(() => {
+        this.makeMove(randomIndex);
+      }, 2000); // Delay the machine's move
     }
   }
 
@@ -128,7 +253,8 @@ console.log("Valor mudado",!this.xIsNext);
       .map((square, index) => (square === null ? index : null))
       .filter((index) => index !== null);
 
-    const randomIndex = emptySquares[Math.floor(Math.random() * emptySquares.length)];
+    const randomIndex =
+      emptySquares[Math.floor(Math.random() * emptySquares.length)];
     if (randomIndex !== null && randomIndex !== undefined) {
       this.makeMove(randomIndex);
     }
@@ -151,7 +277,11 @@ console.log("Valor mudado",!this.xIsNext);
     ];
     for (let i = 0; i < lines.length; i++) {
       const [a, b, c] = lines[i];
-      if (this.squares[a] && this.squares[a] === this.squares[b] && this.squares[a] === this.squares[c]) {
+      if (
+        this.squares[a] &&
+        this.squares[a] === this.squares[b] &&
+        this.squares[a] === this.squares[c]
+      ) {
         return { winner: this.squares[a], line: lines[i] };
       }
     }
@@ -160,7 +290,7 @@ console.log("Valor mudado",!this.xIsNext);
 
   saveWinner(winnerName: string | null) {
     if (!winnerName) return;
-    const record = this.records.find(record => record.name === winnerName);
+    const record = this.records.find((record) => record.name === winnerName);
     if (record) {
       record.wins += 1;
     } else {
@@ -221,11 +351,21 @@ console.log("Valor mudado",!this.xIsNext);
     if (moveIndex > -1) {
       this.makeMove(moveIndex);
     } else if (
-      ['novo jogo', 'recomeçar', 'jogar novamente'].includes(command.toLowerCase())
+      ['novo jogo', 'recomeçar', 'jogar novamente'].includes(
+        command.toLowerCase()
+      )
     ) {
       this.newGame();
+    } else if ('voltar'.includes(command.toLowerCase())) {
+      this.router.navigate(['/']);
     } else {
       console.log('Command not recognized:', command);
     }
+  }
+
+  speak(message: string) {
+    const speech = new SpeechSynthesisUtterance(message);
+    speech.lang = 'pt-BR';
+    window.speechSynthesis.speak(speech);
   }
 }
