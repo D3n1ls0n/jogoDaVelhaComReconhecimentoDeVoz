@@ -28,6 +28,8 @@ export class BoardComponent implements OnInit {
   player2TicketNumber: string | null = null;
   countdown: number = 0;
   public player2Name_: any;
+  public playerId1: any;
+  public playerId2: any;
 
   showCountdown = true;
   showStartMessage = false;
@@ -91,7 +93,6 @@ export class BoardComponent implements OnInit {
                 this.player2Name as string,
                 this.player2TicketNumber as string
               );
-              return;
             }
           } else {
             console.log('Os nomes e/ou bilhetes dos jogadores são inválidos.');
@@ -113,20 +114,32 @@ export class BoardComponent implements OnInit {
                 this.player1TicketNumber as string
               );
             }
-            console.log('Enviar apenas o jogador e BI do jogador 1');
           }
         }
       });
   }
 
+  getPlayerByNameAndTicket(nome: any, bi: any, playerIndex: number) {
+    const playerData = { Nome: nome, bi: bi };
+    this.http
+      .post('http://localhost:3000/find-player-by-data', playerData)
+      .subscribe((response: any) => {
+        if (playerIndex === 1) {
+          this.playerId1 = response.ID;
+        } else if (playerIndex === 2) {
+          this.playerId2 = response.ID;
+        }
+        console.log(response);
+      });
+  }
+
   registerPlayer(player: any, ticket: any) {
     const playerData = { Nome: player, bi: ticket };
-    console.log(playerData);
-
     this.http
       .post('http://localhost:3000/player', playerData)
       .subscribe((response: any) => {
-        console.log(response);
+        const playerId = response.insertId; // Obtém o ID inserido, esse ID vai ser usado quando o jogo terminar (vai servir para a tabela Records)
+        console.log('ID do jogador inserido:', playerId);
       });
   }
 
@@ -205,6 +218,7 @@ export class BoardComponent implements OnInit {
         return; // Exit if there's a winner
       } else if (this.noOneWonTheGame()) {
         this.winner = 'Empate';
+        this.saveInRecordTable(this.winner);
         return; // Exit if there's a draw
       }
 
@@ -291,12 +305,36 @@ export class BoardComponent implements OnInit {
   saveWinner(winnerName: string | null) {
     if (!winnerName) return;
     const record = this.records.find((record) => record.name === winnerName);
+
     if (record) {
       record.wins += 1;
     } else {
       this.records.push({ name: winnerName, wins: 1 });
     }
-    this.saveRecords();
+    //this.saveRecords();
+
+    this.saveInRecordTable(winnerName);
+  }
+
+  saveInRecordTable(winnerName: any) {
+    this.getPlayerByNameAndTicket(
+      this.player1Name,
+      this.player1TicketNumber,
+      1
+    );
+
+    this.getPlayerByNameAndTicket(
+      this.player2Name,
+      this.player2TicketNumber,
+      2
+    );
+
+    setTimeout(() => {
+      console.log(this.playerId1, this.playerId2);
+      if (!winnerName) {
+        console.log('Empate');
+      }
+    }, 500);
   }
 
   loadRecords() {
