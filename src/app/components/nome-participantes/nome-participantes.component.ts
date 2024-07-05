@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Output, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-nome-participantes',
@@ -26,8 +27,13 @@ export class NomeParticipantesComponent {
   public currentStep: number = 0; // Rastreamento da etapa atual no processo de reconhecimento de voz
   isRecognitionActive: boolean = false; // Indica se o reconhecimento de voz está ativo
   playingAgainstMachine: boolean = false; // Indica se o jogador está jogando contra a máquina
+  biExist: boolean = false; // Indica se o bi já existe na base de dados
 
-  constructor(private router: Router, private ngZone: NgZone) {}
+  constructor(
+    private router: Router,
+    private ngZone: NgZone,
+    private http: HttpClient
+  ) {}
 
   submitNames() {
     // Emite os nomes dos jogadores e redireciona para o componente do tabuleiro com parâmetros da URL
@@ -44,7 +50,7 @@ export class NomeParticipantesComponent {
           player2: this.player2Name,
           player2Piece: this.player2Piece,
           player1TicketNumber: this.player1TicketNumber,
-          player2TicketNumber: this.player2TicketNumber
+          player2TicketNumber: this.player2TicketNumber,
         },
       });
     });
@@ -69,8 +75,6 @@ export class NomeParticipantesComponent {
     const synth = window.speechSynthesis;
 
     if (SpeechRecognition && synth) {
-      console.log('AQUI');
-
       this.recognition = new SpeechRecognition();
       this.recognition.continuous = false;
       this.recognition.lang = 'pt-BR';
@@ -102,10 +106,10 @@ export class NomeParticipantesComponent {
         this.recognition.stop();
         setTimeout(() => {
           speak(text);
-        }, 500);
+        }, 500); // Atraso de meio segundo antes de falar a mensagem
       };
 
-      this.recognition.onresult = (event: any) => {
+      this.recognition.onresult = async (event: any) => {
         // Lida com o resultado do reconhecimento de voz
         const transcript =
           event.results[event.resultIndex][0].transcript.trim();
@@ -134,9 +138,20 @@ export class NomeParticipantesComponent {
         } else if (step === 2 && this.playingAgainstMachine) {
           // Etapa de captura do número de bilhete do Jogador 1
           this.player1TicketNumber = transcript;
-          step++;
-          this.currentStep = step;
-          promptUser('Por favor, escolha sua peça (UM ou DOIS).');
+          await this.delay(500); // Atraso de meio segundo antes de chamar getAllPlayers()
+          await this.getAllPlayers();
+
+          if (!this.biExist) {
+            console.log("JJJJJJJJJJJ");
+
+            promptUser(
+              'Esse número de bilhete já está cadastrado. Por favor, informe um novo número de bilhete.'
+            );
+          } else {
+            step++;
+            this.currentStep = step;
+            promptUser('Por favor, escolha sua peça (UM ou DOIS).');
+          }
         } else if (step === 3 && this.playingAgainstMachine) {
           // Etapa de escolha da peça pelo Jogador 1
           if (
@@ -190,9 +205,17 @@ export class NomeParticipantesComponent {
         } else if (step === 4 && !this.playingAgainstMachine) {
           // Etapa de captura do número de bilhete do Jogador 1
           this.player1TicketNumber = transcript;
-          step++;
-          this.currentStep = step;
-          promptUser('Por favor, diga o nome do Jogador 2.');
+          await this.delay(500); // Atraso de meio segundo antes de chamar getAllPlayers()
+          await this.getAllPlayers();
+          if (!this.biExist) {
+            promptUser(
+              'Esse número de bilhete já está cadastrado. Por favor, informe um novo número de bilhete.'
+            );
+          } else {
+            step++;
+            this.currentStep = step;
+            promptUser('Por favor, diga o nome do Jogador 2.');
+          }
         } else if (step === 5 && !this.playingAgainstMachine) {
           // Etapa de captura do nome do Jogador 2
           this.player2Name = transcript;
@@ -202,13 +225,21 @@ export class NomeParticipantesComponent {
         } else if (step === 6 && !this.playingAgainstMachine) {
           // Etapa de captura do número de bilhete do Jogador 2
           this.player2TicketNumber = transcript;
-          step++;
-          this.currentStep = step;
-          promptUser(
-            `Jogador 2 ficará com a peça ${
-              this.player2Piece === 'X' ? 'UM (X)' : 'DOIS (O)'
-            }. Gostaria de iniciar o jogo? Diga SIM para começar.`
-          );
+          await this.delay(500); // Atraso de meio segundo antes de chamar getAllPlayers()
+          await this.getAllPlayers();
+          if (!this.biExist) {
+            promptUser(
+              'Esse número de bilhete já está cadastrado. Por favor, informe um novo número de bilhete.'
+            );
+          } else {
+            step++;
+            this.currentStep = step;
+            promptUser(
+              `Jogador 2 ficará com a peça ${
+                this.player2Piece === 'X' ? 'UM (X)' : 'DOIS (O)'
+              }. Gostaria de iniciar o jogo? Diga SIM para começar.`
+            );
+          }
         } else if (step === 7 && !this.playingAgainstMachine) {
           // Etapa de confirmação para iniciar o jogo
           this.decision = transcript.toLowerCase();
@@ -226,6 +257,32 @@ export class NomeParticipantesComponent {
     } else {
       alert('Seu navegador não suporta reconhecimento de fala.'); // Alerta se o navegador não suportar reconhecimento de voz
     }
+  }
+
+  delay(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+
+  getAllPlayers() {
+    this.http
+      .get('http://localhost:3000/getAllPlayers')
+      .subscribe((response: any) => {
+        // Inicializa arrays para armazenar os bilhetes
+        const bilhetes: string[] = [];
+
+        // Itera sobre a resposta e armazena os valores nos arrays
+        response.forEach((element: any) => {
+          bilhetes.push(element.bi);
+        });
+
+        // Verifica se this.player1TicketNumber está na lista de bilhetes
+        this.biExist = bilhetes.includes(this.player1TicketNumber as string);
+
+        console.log("AQUI",this.biExist); // Verifica no console se biExist está correto
+
+        return;
+      });
   }
 
   ngOnInit() {

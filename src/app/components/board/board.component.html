@@ -11,11 +11,15 @@
 
   <!-- Records Section -->
   <div class="records">
-    <h2>Records</h2>
+    <h2>Recordes</h2>
     <ul>
-      <li *ngFor="let record of records">{{ record.name }}: {{ record.wins }} vitória(s)</li>
+      <li *ngFor="let record of theBestRecords">
+        <span>{{ record.Nome }} ({{ record.bi }}):</span>
+        <span>{{ record.NumeroDeVitorias }} vitórias - {{ record.MenorTempoJogoTotal }} segundos</span>
+      </li>
     </ul>
   </div>
+
 
   <!-- Tabuleiro do jogo, ocultar enquanto a contagem regressiva estiver ativa -->
   <div *ngIf="!showCountdown && !showStartMessage">

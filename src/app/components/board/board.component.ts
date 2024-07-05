@@ -86,7 +86,6 @@ export class BoardComponent implements OnInit {
               bilhetes.includes(this.player2TicketNumber as string);
 
             if (player1Exists && player2Exists) {
-              console.log('Já existe esse usuário.');
             } else {
               this.registerPlayer(
                 this.player1Name as string,
@@ -110,7 +109,6 @@ export class BoardComponent implements OnInit {
               bilhetes.includes(this.player1TicketNumber as string);
 
             if (player1Exists) {
-              console.log('Já existe esse usuário.');
             } else {
               this.registerPlayer(
                 this.player1Name as string,
@@ -132,7 +130,6 @@ export class BoardComponent implements OnInit {
         } else if (playerIndex === 2) {
           this.playerId2 = response.ID;
         }
-        console.log(response);
       });
   }
 
@@ -142,7 +139,6 @@ export class BoardComponent implements OnInit {
       .post('http://localhost:3000/player', playerData)
       .subscribe((response: any) => {
         const playerId = response.insertId; // Obtém o ID inserido, esse ID vai ser usado quando o jogo terminar (vai servir para a tabela Records)
-        console.log('ID do jogador inserido:', playerId);
       });
   }
 
@@ -152,8 +148,7 @@ export class BoardComponent implements OnInit {
       .get('http://localhost:3000/getBestRecords')
       .subscribe((response: any) => {
         this.theBestRecords = response;
-        console.log("Melhores Record:", this.theBestRecords);
-
+        console.log(this.theBestRecords);
       });
   }
 
@@ -217,6 +212,7 @@ export class BoardComponent implements OnInit {
     this.winningSquares = [];
     // Reiniciar cronômetro
     this.resetTimer();
+    this.listTheBestRecords()
   }
 
   get player() {
@@ -333,7 +329,6 @@ export class BoardComponent implements OnInit {
     // Parar o cronômetro
     if (this.startTime !== null) {
       this.elapsedTime = Math.floor((Date.now() - this.startTime) / 1000);
-      console.log(`Tempo decorrido: ${this.elapsedTime} segundos`);
     }
 
     const record = this.records.find((record) => record.name === winnerName);
@@ -346,6 +341,15 @@ export class BoardComponent implements OnInit {
     //this.saveRecords();
 
     this.saveInRecordTable(winnerName);
+
+    // Anunciar o vencedor e perguntar se deseja continuar jogando
+    if (winnerName) {
+      this.speak(
+        `Parabéns, ${winnerName}! Você venceu o jogo. Deseja continuar jogando?`
+      );
+    } else {
+      this.speak('O jogo terminou em empate. Deseja continuar jogando?');
+    }
   }
 
   saveInRecordTable(winnerName: any) {
@@ -374,9 +378,7 @@ export class BoardComponent implements OnInit {
         };
 
         this.http.post('http://localhost:3000/record', playerData).subscribe(
-          (response: any) => {
-            console.log('Resposta:', response);
-          },
+          (response: any) => {},
           (error: any) => {
             console.error('Erro:', error);
           }
@@ -390,9 +392,7 @@ export class BoardComponent implements OnInit {
         };
 
         this.http.post('http://localhost:3000/record', playerData2).subscribe(
-          (response: any) => {
-            console.log('Resposta:', response);
-          },
+          (response: any) => {},
           (error: any) => {
             console.error('Erro:', error);
           }
@@ -406,9 +406,7 @@ export class BoardComponent implements OnInit {
         };
 
         this.http.post('http://localhost:3000/record', playerData).subscribe(
-          (response: any) => {
-            console.log('Resposta:', response);
-          },
+          (response: any) => {},
           (error: any) => {
             console.error('Erro:', error);
           }
@@ -422,9 +420,7 @@ export class BoardComponent implements OnInit {
         };
 
         this.http.post('http://localhost:3000/record', playerData1).subscribe(
-          (response: any) => {
-            console.log('Resposta:', response);
-          },
+          (response: any) => {},
           (error: any) => {
             console.error('Erro:', error);
           }
@@ -441,9 +437,7 @@ export class BoardComponent implements OnInit {
         };
 
         this.http.post('http://localhost:3000/record', playerData).subscribe(
-          (response: any) => {
-            console.log('Resposta:', response);
-          },
+          (response: any) => {},
           (error: any) => {
             console.error('Erro:', error);
           }
@@ -457,9 +451,7 @@ export class BoardComponent implements OnInit {
         };
 
         this.http.post('http://localhost:3000/record', playerData1).subscribe(
-          (response: any) => {
-            console.log('Resposta:', response);
-          },
+          (response: any) => {},
           (error: any) => {
             console.error('Erro:', error);
           }
@@ -522,7 +514,7 @@ export class BoardComponent implements OnInit {
     if (moveIndex > -1) {
       this.makeMove(moveIndex);
     } else if (
-      ['novo jogo', 'recomeçar', 'jogar novamente'].includes(
+      ['novo jogo', 'recomeçar', 'jogar novamente', 'sim'].includes(
         command.toLowerCase()
       )
     ) {
