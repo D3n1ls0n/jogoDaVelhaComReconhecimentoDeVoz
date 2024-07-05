@@ -38,6 +38,7 @@ export class BoardComponent implements OnInit {
   startTime: number | null = null;
   elapsedTime: number = 0;
   dataActual: any;
+  public theBestRecords: any;
 
   constructor(
     private ngZone: NgZone,
@@ -145,6 +146,17 @@ export class BoardComponent implements OnInit {
       });
   }
 
+  listTheBestRecords() {
+    //Trás os três melhores records
+    this.http
+      .get('http://localhost:3000/getBestRecords')
+      .subscribe((response: any) => {
+        this.theBestRecords = response;
+        console.log("Melhores Record:", this.theBestRecords);
+
+      });
+  }
+
   ngOnInit() {
     this.route.queryParams.subscribe((params) => {
       this.player1Name = params['player1'];
@@ -165,6 +177,7 @@ export class BoardComponent implements OnInit {
     console.log(this.xIsNext, this.isMachinePlaying, this.winner);
     this.player2Name_ = this.player2Name;
     this.getAllPlayers();
+    this.listTheBestRecords();
   }
 
   startCountdown() {
