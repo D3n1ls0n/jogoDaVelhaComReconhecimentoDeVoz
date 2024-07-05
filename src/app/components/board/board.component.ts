@@ -35,7 +35,9 @@ export class BoardComponent implements OnInit {
   showStartMessage = false;
   isMachinePlaying = false;
   records: { name: string; wins: number }[] = [];
-  private data: any;
+  startTime: number | null = null;
+  elapsedTime: number = 0;
+  dataActual: any;
 
   constructor(
     private ngZone: NgZone,
@@ -177,8 +179,18 @@ export class BoardComponent implements OnInit {
         setTimeout(() => {
           this.showStartMessage = false;
         }, 2000);
+
+        // Iniciar cronômetro
+        this.resetTimer();
       }
     }, 1000);
+  }
+
+  resetTimer() {
+    this.startTime = Date.now();
+    this.elapsedTime = 0;
+    const isoString = new Date().toISOString();
+    this.dataActual = `${isoString.slice(0, 10)} ${isoString.slice(11, 19)}`;
   }
 
   newGame() {
@@ -191,6 +203,8 @@ export class BoardComponent implements OnInit {
       this.xIsNext = false;
     }
     this.winningSquares = [];
+    // Reiniciar cronômetro
+    this.resetTimer();
   }
 
   get player() {
@@ -304,6 +318,12 @@ export class BoardComponent implements OnInit {
 
   saveWinner(winnerName: string | null) {
     if (!winnerName) return;
+    // Parar o cronômetro
+    if (this.startTime !== null) {
+      this.elapsedTime = Math.floor((Date.now() - this.startTime) / 1000);
+      console.log(`Tempo decorrido: ${this.elapsedTime} segundos`);
+    }
+
     const record = this.records.find((record) => record.name === winnerName);
 
     if (record) {
@@ -330,10 +350,108 @@ export class BoardComponent implements OnInit {
     );
 
     setTimeout(() => {
-      console.log(this.playerId1, this.playerId2);
-      if (!winnerName) {
-        console.log('Empate');
+      /* if (!winnerName) {
+
+      } else { }*/
+      if (winnerName === this.player1Name) {
+        const playerData = {
+          JogadorID: this.playerId1,
+          DataJogo: this.dataActual,
+          Resultado: 'Vitória',
+          TempoJogo: this.elapsedTime,
+        };
+
+        this.http.post('http://localhost:3000/record', playerData).subscribe(
+          (response: any) => {
+            console.log('Resposta:', response);
+          },
+          (error: any) => {
+            console.error('Erro:', error);
+          }
+        );
+
+        const playerData2 = {
+          JogadorID: this.playerId2,
+          DataJogo: this.dataActual,
+          Resultado: 'Derrota',
+          TempoJogo: this.elapsedTime,
+        };
+
+        this.http.post('http://localhost:3000/record', playerData2).subscribe(
+          (response: any) => {
+            console.log('Resposta:', response);
+          },
+          (error: any) => {
+            console.error('Erro:', error);
+          }
+        );
+      } else if (winnerName === this.player2Name) {
+        const playerData = {
+          JogadorID: this.playerId2,
+          DataJogo: this.dataActual,
+          Resultado: 'Vitória',
+          TempoJogo: this.elapsedTime,
+        };
+
+        this.http.post('http://localhost:3000/record', playerData).subscribe(
+          (response: any) => {
+            console.log('Resposta:', response);
+          },
+          (error: any) => {
+            console.error('Erro:', error);
+          }
+        );
+
+        const playerData1 = {
+          JogadorID: this.playerId1,
+          DataJogo: this.dataActual,
+          Resultado: 'Derrota',
+          TempoJogo: this.elapsedTime,
+        };
+
+        this.http.post('http://localhost:3000/record', playerData1).subscribe(
+          (response: any) => {
+            console.log('Resposta:', response);
+          },
+          (error: any) => {
+            console.error('Erro:', error);
+          }
+        );
+      } else {
+        const playerData = {
+          JogadorID: this.playerId2,
+          DataJogo: this.dataActual,
+          Resultado: 'Empate',
+          TempoJogo: this.elapsedTime,
+        };
+
+        this.http.post('http://localhost:3000/record', playerData).subscribe(
+          (response: any) => {
+            console.log('Resposta:', response);
+          },
+          (error: any) => {
+            console.error('Erro:', error);
+          }
+        );
+
+        const playerData1 = {
+          JogadorID: this.playerId1,
+          DataJogo: this.dataActual,
+          Resultado: 'Empate',
+          TempoJogo: this.elapsedTime,
+        };
+
+        this.http.post('http://localhost:3000/record', playerData1).subscribe(
+          (response: any) => {
+            console.log('Resposta:', response);
+          },
+          (error: any) => {
+            console.error('Erro:', error);
+          }
+        );
       }
+      // Reiniciar cronômetro
+      this.resetTimer();
     }, 500);
   }
 

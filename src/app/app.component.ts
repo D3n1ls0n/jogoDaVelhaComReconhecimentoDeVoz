@@ -14,7 +14,7 @@ import { HttpClientModule } from '@angular/common/http'; // Importação do Http
     NomeParticipantesComponent,
     FormsModule,
     RouterModule,
-    HttpClientModule
+    HttpClientModule,
   ],
   template: '<router-outlet></router-outlet>',
   styleUrl: './app.component.scss',
