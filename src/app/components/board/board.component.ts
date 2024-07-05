@@ -174,7 +174,6 @@ export class BoardComponent implements OnInit {
     this.loadRecords();
     this.newGame();
     this.setupVoiceRecognition();
-    console.log(this.xIsNext, this.isMachinePlaying, this.winner);
     this.player2Name_ = this.player2Name;
     this.getAllPlayers();
     this.listTheBestRecords();
@@ -431,6 +430,9 @@ export class BoardComponent implements OnInit {
           }
         );
       } else {
+        if (this.startTime !== null) {
+          this.elapsedTime = Math.floor((Date.now() - this.startTime) / 1000);
+        }
         const playerData = {
           JogadorID: this.playerId2,
           DataJogo: this.dataActual,
