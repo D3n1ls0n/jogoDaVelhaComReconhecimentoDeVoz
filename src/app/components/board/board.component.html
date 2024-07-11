@@ -1,8 +1,8 @@
 <main class="screen game-container">
   <!-- Contagem regressiva -->
-  <div *ngIf="showCountdown" class="countdown">
+ <!--  <div *ngIf="showCountdown" class="countdown">
     <h1>{{ countdown }}</h1>
-  </div>
+  </div> -->
 
   <!-- Mensagem de início do jogo -->
   <div *ngIf="showStartMessage" class="start-message">
@@ -21,8 +21,8 @@
   </div>
 
 
-  <!-- Tabuleiro do jogo, ocultar enquanto a contagem regressiva estiver ativa -->
-  <div *ngIf="!showCountdown && !showStartMessage">
+  <!-- Tabuleiro do jogo, ocultar enquanto a contagem regressiva estiver ativa *ngIf="!showCountdown && !showStartMessage"-->
+  <div>
     <div class="board">
       <h2>T A B U L E I R O</h2>
       <p>Jogador 1: {{ player1Name }} ({{ player1Piece }})</p>
@@ -48,9 +48,9 @@
       </app-square>
     </section>
 
-    <button class="new-game-button" *ngIf="winner || noOneWonTheGame()" (click)="newGame()" style="cursor: pointer;">
+   <!--  <button class="new-game-button" *ngIf="winner || noOneWonTheGame()" (click)="newGame()" style="cursor: pointer;">
       Começar Um Novo Jogo
-    </button>
+    </button> -->
 
     <!-- Legenda do tabuleiro -->
     <div class="legend">

@@ -31,6 +31,8 @@ export class BoardComponent implements OnInit {
   public playerId1: any;
   public playerId2: any;
 
+
+
   showCountdown = true;
   showStartMessage = false;
   isMachinePlaying = false;
@@ -64,7 +66,7 @@ export class BoardComponent implements OnInit {
 
         // Itera sobre a resposta e armazena os valores nos arrays
         response.forEach((element: any) => {
-          nomes.push(element.Nome);
+          /* nomes.push(element.Nome); */
           bilhetes.push(element.bi);
         });
 
@@ -79,23 +81,23 @@ export class BoardComponent implements OnInit {
           if (player1Valid && player2Valid) {
             // Verifica se existe um nome e bi igual ao dos jogadores que vieram pela rota
             const player1Exists =
-              nomes.includes(this.player1Name as string) &&
+              /*  nomes.includes(this.player1Name as string); */
               bilhetes.includes(this.player1TicketNumber as string);
             const player2Exists =
-              nomes.includes(this.player2Name as string) &&
+              /* nomes.includes(this.player2Name_ as string); */
               bilhetes.includes(this.player2TicketNumber as string);
 
-            if (player1Exists && player2Exists) {
-            } else {
+            if (!player1Exists) {
               this.registerPlayer(
                 this.player1Name as string,
                 this.player1TicketNumber as string
               );
+            }
+            if (!player2Exists)
               this.registerPlayer(
                 this.player2Name as string,
                 this.player2TicketNumber as string
               );
-            }
           } else {
             console.log('Os nomes e/ou bilhetes dos jogadores são inválidos.');
           }
@@ -104,9 +106,9 @@ export class BoardComponent implements OnInit {
           const player1Valid =
             this.player1Name !== null && this.player1TicketNumber !== null;
           if (player1Valid) {
-            const player1Exists =
-              nomes.includes(this.player1Name as string) &&
-              bilhetes.includes(this.player1TicketNumber as string);
+            const player1Exists = bilhetes.includes(
+              this.player1TicketNumber as string
+            );
 
             if (player1Exists) {
             } else {
@@ -212,7 +214,7 @@ export class BoardComponent implements OnInit {
     this.winningSquares = [];
     // Reiniciar cronômetro
     this.resetTimer();
-    this.listTheBestRecords()
+    this.listTheBestRecords();
   }
 
   get player() {
@@ -265,6 +267,17 @@ export class BoardComponent implements OnInit {
     const randomIndex =
       emptySquares[Math.floor(Math.random() * emptySquares.length)];
     if (randomIndex !== null && randomIndex !== undefined) {
+      /*  const moveCommands = [
+        'um',
+        'dois',
+        'três',
+        'quatro',
+        'cinco',
+        'seis',
+        'sete',
+        'oito',
+        'nove',
+      ]; */
       const moveCommands = [
         'superior esquerdo',
         'superior meio',
@@ -509,6 +522,17 @@ export class BoardComponent implements OnInit {
       'inferior meio',
       'inferior direito',
     ];
+    /* const moveCommands = [
+      'um',
+      'dois',
+      'três',
+      'quatro',
+      'cinco',
+      'seis',
+      'sete',
+      'oito',
+      'nove',
+    ]; */
     const moveIndex = moveCommands.indexOf(command.toLowerCase());
 
     if (moveIndex > -1) {
