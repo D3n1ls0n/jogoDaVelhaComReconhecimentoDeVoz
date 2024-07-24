@@ -173,6 +173,7 @@ export class BoardComponent implements OnInit {
     this.setupVoiceRecognition();
     this.player2Name_ = this.player2Name;
     this.getAllPlayers();
+
     this.listTheBestRecords();
   }
 
@@ -232,6 +233,7 @@ export class BoardComponent implements OnInit {
       this.squares.splice(idx, 1, this.player);
       this.xIsNext = !this.xIsNext; // Toggle the next player
 
+      // this.speak();
       const winnerData = this.calculateWinner();
       if (winnerData) {
         this.winner = winnerData.winner;
@@ -304,6 +306,8 @@ export class BoardComponent implements OnInit {
 
     const randomIndex =
       emptySquares[Math.floor(Math.random() * emptySquares.length)];
+
+
     if (randomIndex !== null && randomIndex !== undefined) {
       this.makeMove(randomIndex);
     }
@@ -551,6 +555,8 @@ export class BoardComponent implements OnInit {
   }
 
   speak(message: string) {
+    console.log(message);
+
     const speech = new SpeechSynthesisUtterance(message);
     speech.lang = 'pt-BR';
     window.speechSynthesis.speak(speech);
